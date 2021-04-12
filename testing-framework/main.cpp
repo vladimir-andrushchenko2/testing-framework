@@ -4,6 +4,7 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <sstream>
 
 using namespace std::string_literals;
 
@@ -145,22 +146,96 @@ std::set<int> TakePrimes(const std::set<int>& numbers) {
     return primes;
 }
 
+class Synonyms {
+public:
+    void Add(const std::string& first_word, const std::string& second_word) {
+        synonyms_[first_word].insert(second_word);
+        synonyms_[second_word].insert(first_word);
+    }
+
+    size_t GetSynonymCount(const std::string& word) const {
+        if (synonyms_.count(word) != 0) {
+            return synonyms_.at(word).size();
+        }
+        return 0;
+    }
+
+    bool AreSynonyms(const std::string& first_word, const std::string& second_word) const {
+        if (synonyms_.count(first_word) == 0) {
+            return false;
+        }
+        
+        if (synonyms_.at(first_word).count(second_word) == 1) {
+            return true;
+        }
+        
+        return false;
+    }
+
+private:
+    std::map<std::string, std::set<std::string>> synonyms_;
+};
+
+void TestAddingSynonymsIncreasesTheirCount() {
+    Synonyms synonyms;
+    assert(synonyms.GetSynonymCount("music"s) == 0);
+    assert(synonyms.GetSynonymCount("melody"s) == 0);
+
+    synonyms.Add("music"s, "melody"s);
+    assert(synonyms.GetSynonymCount("music"s) == 1);
+    assert(synonyms.GetSynonymCount("melody"s) == 1);
+
+    synonyms.Add("music"s, "tune"s);
+    assert(synonyms.GetSynonymCount("music"s) == 2);
+    assert(synonyms.GetSynonymCount("tune"s) == 1);
+    assert(synonyms.GetSynonymCount("melody"s) == 1);
+}
+
+void TestAreSynonyms() {
+    Synonyms synonyms;
+    
+    synonyms.Add("color", "hue");
+    assert(synonyms.AreSynonyms("color", "hue") == true);
+    assert(synonyms.AreSynonyms("hue", "color") == true);
+    
+    // not added
+    assert(synonyms.AreSynonyms("goood", "great") == false);
+}
+
+void TestSynonyms() {
+    TestAddingSynonymsIncreasesTheirCount();
+    TestAreSynonyms();
+}
+
 int main() {
-    {
-        const std::set<int> numbers = {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-        const std::set<int> expected_primes = {2, 3, 5, 7, 11, 13};
-        ASSERT_EQUAL(TakePrimes(numbers), expected_primes);
-    }
+    TestSynonyms();
 
-    {
-        const std::map<std::string, int> people = {{"Ivan"s, 19}, {"Sergey"s, 16}, {"Alexey"s, 18}};
-        const std::map<std::string, int> expected_adults = {{"Alexey"s, 18}, {"Ivan"s, 19}};
-        ASSERT_EQUAL(TakeAdults(people), expected_adults);
-    }
+    Synonyms synonyms;
 
-    {
-        const std::vector<int> numbers = {3, 2, 1, 0, 3, 6};
-        const std::vector<int> expected_evens = {2, 0, 6};
-        ASSERT_EQUAL(TakeEvens(numbers), expected_evens);
+    std::string line;
+    while (getline(std::cin, line)) {
+        std::istringstream command(line);
+        std::string action;
+        command >> action;
+
+        if (action == "ADD"s) {
+            std::string first_word, second_word;
+            command >> first_word >> second_word;
+            synonyms.Add(first_word, second_word);
+        } else if (action == "COUNT"s) {
+            std::string word;
+            command >> word;
+            std::cout << synonyms.GetSynonymCount(word) << std::endl;
+        } else if (action == "CHECK"s) {
+            std::string first_word, second_word;
+            command >> first_word >> second_word;
+            if (synonyms.AreSynonyms(first_word, second_word)) {
+                std::cout << "YES"s << std::endl;
+            } else {
+                std::cout << "NO"s << std::endl;
+            }
+        } else if (action == "EXIT"s) {
+            break;
+        }
     }
 }
