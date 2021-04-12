@@ -163,4 +163,6 @@ int main() {
         const std::vector<int> expected_evens = {2, 0, 6};
         ASSERT_EQUAL(TakeEvens(numbers), expected_evens);
     }
+    
+    std::cout << "Tests finished ok\n";
 }
