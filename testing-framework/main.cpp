@@ -1,14 +1,24 @@
-//
-//  main.cpp
-//  testing-framework
-//
-//  Created by Vladimir Andrushchenko on 12.04.2021.
-//
-
+#include <cstdlib>
 #include <iostream>
+#include <string>
 
-int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
-    return 0;
+using namespace std;
+
+void Assert(bool value, const string& hint) {
+    if (!value) {
+        cout << "Assertion failed.";
+        if (!hint.empty()) {
+            cout << " Hint: "s << hint;
+        }
+        cout << endl;
+        abort();
+    }
+}
+
+int main() {
+    const string greeting = "Hello"s;
+    // Намеренная ошибка в условии, чтобы показать работу Assert
+    Assert(greeting.empty(), "Greeting must be non-empty"s);
+    // Следующая строка не должна выполниться, так как Assert аварийно завершит работу программы
+    cout << "This line will not be printed"s << endl;
 }
